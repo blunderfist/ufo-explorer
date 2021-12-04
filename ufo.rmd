@@ -1,0 +1,747 @@
+---
+title: "UFO Project"
+author: "Matt Thompson"
+date: "10/2/2021"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(stringr)
+library(stringi)
+
+ufo <- read.csv("C:/Users/mdt20/Documents/Python/ufo_crawl/ufo_data_master.txt", sep = ",")
+
+```
+
+## R Markdown
+
+I scraped UFO reports from nuforc.org and compiled them into a csv. (https://github.com/blunderfist/py_projects/tree/main/ufo_data "Here's the code").
+
+I'll get an idea of what the data looks like before starting this project.
+
+```{r}
+head(ufo)
+summary(ufo)
+```
+
+I want to separate the date and time to break each category down into individual columns of year, month, day, hour, minute. 
+
+```{r}
+ufo[c("date", "time")] <- str_split_fixed(ufo$date_time, " ", 2)
+ufo
+
+```
+
+```{r}
+
+ufo[c("month", "day", "year")] <- str_split_fixed(ufo$date, "/", 3)
+ufo[c("hour", "minute")] <- str_split_fixed(ufo$time, ":", 2)
+
+head(ufo)
+
+```
+
+
+
+I want to add the full 4 digit year to the year column. I need to examine the year column to see where to changes century and how far back it goes. It appears to not go past the 1900s. The row number between centuries was located by some trial and error. Everything up to that row will have 20 added and everything past it will have 19 added.
+
+```{r}
+#first 2000 year
+(start_of_century <- ufo$date_time[115672])
+#end of 1990s
+(end_of_century <- ufo$date_time[115673])
+# nrow(ufo)
+# tail(ufo, 100)
+
+```
+
+Produce full four digit year.
+
+```{r}
+#this takes a little while to run
+
+for(i in 1:115672){
+ufo$year[i] <- paste(20, ufo$year[i], sep = "")
+}
+
+for(i in 115673:nrow(ufo)){
+ufo$year[i] <- paste(19, ufo$year[i], sep = "")
+}
+
+```
+
+Inspect results.
+
+```{r}
+head(ufo$year)
+tail(ufo$year)
+```
+
+Looks good.
+
+
+## Duration
+
+Duration needs to be cleaned up. I'll take a closer look at it.
+
+
+```{r}
+
+head(ufo$duration)
+
+```
+
+This column has a lot of variation in how duration is reported. I'll start by trying to create new categories based on the unit of time.
+
+```{r}
+
+ufo_duration <- ufo
+
+ufo_duration$duration <- tolower(ufo_duration$duration)
+
+
+pull_nums <- parse_number(ufo_duration$duration, na = "NA", trim_ws = T)
+pull_chars <- parse_character(ufo_duration$duration, na = "NA", trim_ws = T)
+
+ufo_duration["dur_num"] <- pull_nums
+ufo_duration["dur_char"] <- pull_chars
+
+ufo_duration
+
+```
+
+Now that the numbers are pulled from the duration I'll attempt to separate the dur_chars columns to only show text with the ultimate goal of showing only the unit of measure.
+
+```{r}
+
+dur_char1 <- ufo_duration$dur_char
+
+dur_char1 <- gsub("[0-9]", "", dur_char1) # remove numbers
+dur_char1 <- gsub("[[:punct:]]", " ", dur_char1) # remove punctuation
+#dur_char1 <- trimws(dur_char1) # trim trailing and ending white space
+#giving me a problem at the below index
+dur_char1[115854]
+
+# gsub it to a blank and repeat above
+dur_char1[115854] <- ""
+
+dur_char1 <- trimws(dur_char1)
+dur_char1
+
+```
+
+Now to standardize the spelling of the unit of measure.
+
+```{r}
+
+dur_char2 <- dur_char1
+
+# spaces before and after replacement value are necessary to keep it legible and separate
+# to minutes
+dur_char2 <- gsub("minute", " minutes ", dur_char2)
+dur_char2 <- gsub("mins", " minutes ", dur_char2)
+dur_char2 <- gsub("min", " minutes ", dur_char2)
+# to seconds
+dur_char2 <- gsub("second", " seconds ", dur_char2)
+dur_char2 <- gsub("sec", " seconds ", dur_char2)
+# to hours
+dur_char2 <- gsub("hour", " hours ", dur_char2)
+dur_char2 <- gsub("hr", " hours ", dur_char2)
+
+ufo_duration$dur_char <- dur_char2
+ufo_duration$dur_char
+
+```
+
+Pull the unit of measure from the rest of the gibberish.
+
+```{r}
+
+dur_char3 <- dur_char2
+
+# assigns approprate unit of measure to column values
+test1 <- ifelse(grepl("minutes | seconds | hours", dur_char3),
+                ifelse(!grepl("minutes | seconds", dur_char3), "hours",
+                       ifelse(!grepl("minutes", dur_char3), "seconds", 
+                              ifelse(!grepl("seconds", dur_char3), "minutes", NA)
+                              )), NA
+                )
+
+test1
+
+ufo_duration$dur_char <- test1
+
+```
+
+Next step is to standardize the unit of measure. The most granular unit is seconds, so I'll transform all numbers to seconds and then replace the dur_char column to be seconds for all values.
+
+```{r}
+
+# selects conversion to seconds depending on unit of measure
+convert <- ifelse(ufo_duration$dur_char == "seconds", 1,
+                ifelse(ufo_duration$dur_char == "minutes", 60,
+                       ifelse(ufo_duration$dur_char == "hours", 3600, NA)
+                              )
+                )
+
+#create new column with conversion metric
+test_conv <- ufo_duration
+test_conv["convert"] <- convert
+
+# convert to seconds
+test_conv["duration_s"] <- test_conv$dur_num * test_conv$convert
+
+head(test_conv)
+
+```
+
+Some values have a - preceding it which shows up as negative. This is shown below. The abs() function will return the absolute value which should solve this.
+
+```{r}
+
+test_conv %>%
+  filter(duration_s < 0)
+
+test_conv$duration_s <- abs(test_conv$duration_s)
+
+test_conv %>%
+  filter(duration_s < 0)
+
+test_conv
+```
+
+Drop unnecessary columns and rename.
+
+```{r}
+
+ufo <- test_conv %>%
+  select(date_time, city, state, shape, date, time, month, day, year, hour, minute, duration_s)
+
+```
+
+## Country, State, City
+
+I am planning on using a map feature to display location data. To do this I need to get the latitude and longitude for each city. Before I can determine this I need to clean up the city column and check the state column as well.
+
+I will only geocode the North American locations (US and Canada). I'll add a column named country and give it NA values for now.
+
+```{r}
+ufo["country"] <- NA
+head(ufo)
+```
+
+Now to assign "US" to country for abbreviations that match US state codes in the state column.
+
+```{r}
+
+ufo$state <- toupper(ufo$state)
+
+us_states <- c("AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA", 
+                "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", 
+                "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", 
+                "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", 
+                "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY")
+ufo_us <- ufo %>%
+  filter(state %in% us_states) %>%
+  mutate(country = "US")
+head(ufo_us, 100)
+
+```
+
+Now I'll search for Canadian provinces that are listed in the state column.
+
+```{r}
+
+canada_loc <- c("AB", "BC", "MB", "NB", "NL", "NT", "NS", "NU", "ON", "PE", "QC","SK", "YT")
+
+ca_locations <- ufo %>%
+  filter(state %in% canada_loc)
+ca_locations
+```
+
+I'll add CA to the country column for all Canadian observations.
+
+```{r}
+ufo_ca <- ufo %>%
+  filter(state %in% canada_loc) %>%
+  mutate(country = "CA")
+head(ufo_ca)
+```
+
+Now I'll combine the separate US and CA data frames into one and arrange it by date_time as it was originally. I'm showing 100 rows to see if the country column worked (it did).
+
+```{r}
+ufo2 <- rbind(ufo_us, ufo_ca) %>%
+  arrange(date_time)
+head(ufo2, 100)
+```
+
+
+### City
+
+Start by transforming to lower case.
+
+```{r}
+ufo2
+ufo2$city <- stri_trans_tolower(ufo2$city)
+
+# trying the stri to see if it removes utf errors
+#ufo2$city <- tolower(ufo2$city)
+#ufo2$city
+
+```
+
+Trim white space before and after city.
+
+```{r}
+ufo2$city <- trimws(ufo2$city)
+```
+
+There is additional information contained in () after the city name. I'll use a regular expression to select everything up until the first (, and another to match the remainder of the text.
+
+```{r, include = F}
+
+#match before
+matched_before <- sub(" \\(.+", "", ufo2$city)
+#matched_before
+
+#match after (
+matched_after <- sub(".*\\(", "", ufo2$city)
+#matched_after
+
+```
+
+The regular expression appears to have worked. This will be applied to the entire city column. The portion after the ( will just be left out because it seems to be mostly unimportant.
+
+```{r}
+ufo3 <- ufo2 %>%
+  mutate(city = matched_before)
+
+ufo3
+```
+
+```{r}
+unique_loc <- ufo3 %>%
+  mutate(location = paste(city, state, sep = " ")) %>%
+   select(location)
+distinct(unique_loc)
+```
+
+There are just over 25000 unique locations. This means I'll only need to geocode for these and then can fill in the results for duplicate locations.
+
+I still need to clean up the city column. There are symbols like / that complicate the city name and will cause the geocoding to fail. Also, some of the entries are not actual cities and will not be useful for the project. I'll remove anything not starting with a letter, so anything with a symbol or number will get dropped.
+
+First remove anything after / in the city name. Example below to show what I'm dealing with.
+
+```{r}
+#find an example where this == TRUE
+str_detect(ufo3$city, "/")
+
+#print the index an instance
+ufo3$city[111]
+
+```
+
+Remove everything after /.
+
+```{r}
+ufo4 <- ufo3
+remove_forwardslash <- sub("\\/.+", "", ufo4$city)
+#remove_forwardslash
+ufo4$city <- remove_forwardslash
+
+```
+
+Test this worked by searching for TRUE cases.
+
+```{r}
+
+#look for match
+isTRUE(str_detect(ufo4$city, "/"))
+
+```
+
+Success.
+
+Now to remove cities starting with non alphabet characters. Begin by showing example of problem. The issues are visible starting at page 16 below.
+
+```{r}
+
+ufo4 %>%
+  arrange(-desc(city))
+
+```
+
+```{r}
+#regex to detect cities not beginning with a letter
+str_detect(ufo4$city, "^[^a-zA-Z]")
+
+#an example from the results
+ufo4$city[950]
+```
+
+View the rows to remove.
+
+```{r}
+# ^ doesn't contain[^ begins with letters a-z upper and lower]
+ufo4[str_detect(ufo4$city, "^[^a-zA-Z]"),]
+
+```
+
+Rearrange the regex to only keep cities that start with letters. Run the regex to search for removed cities.
+
+```{r}
+# regex looks for rows where city starts with (^) and letters lower or upper case
+ufo5 <- ufo4[str_detect(ufo4$city, "^[a-zA-Z]"),]
+
+# check this doesn't return any values
+ufo5[str_detect(ufo5$city, "^[^a-zA-Z]"),]
+
+```
+
+```{r}
+
+ufo5 %>%
+  arrange(-desc(city))
+```
+
+Success.
+
+Some cities begin with "n. " or "s. " referring to the north or south of an area. Below I'll see how many there are and remove these from the city name.
+
+```{r}
+
+sum(str_detect(ufo5$city, "^n\\. "), na.rm = T)
+sum(str_detect(ufo5$city, "^s\\. "), na.rm = T)
+
+has_n. <- ufo5 %>% select(city) %>% mutate(north = str_detect(ufo5$city, "^n\\. "))
+has_n. <- has_n. %>% filter(north == T)
+```
+
+Remove the prefix "n. " and "s. ".
+
+```{r}
+
+ufo5$city <- str_remove(ufo5$city, "^n\\. ")
+ufo5$city <- str_remove(ufo5$city, "^s\\. ")
+sum(str_detect(ufo5$city, "^n\\. "), na.rm = T)
+sum(str_detect(ufo5$city, "^s\\. "), na.rm = T)
+
+```
+
+## Shape
+
+Now to look at shape.
+
+```{r}
+ufo5 %>%
+  select(shape) %>%
+  distinct()
+```
+
+Some shapes appear to be the same or just spelled slightly differently. I'll make the column lower case to solve some of this. I'll also change TRIANGULAR to triangle since there's only one instance of the former and its pretty much the same thing.
+
+```{r}
+ufo6 <- ufo5 
+#adjust for different cases
+ufo6$shape <- tolower(ufo6$shape)
+
+#change triangular to triangle
+shape_not_triangular <- ufo6 %>%
+  filter(shape != ("triangular"))
+
+shape_triangular <- ufo6 %>%
+  filter(shape == "triangular") %>%
+  mutate(shape = "triangle")
+
+#save to df before next change
+ufo7 <- rbind(shape_triangular, shape_not_triangular)
+
+#change to changing using new df
+shape_not_changing <- ufo7 %>%
+  filter(shape != ("changed"))
+
+shape_changing <- ufo7 %>%
+  filter(shape == "changed") %>%
+  mutate(shape = "changing")
+
+#save to df
+ufo8 <- rbind(shape_changing, shape_not_changing) %>%
+  arrange(date_time)
+
+#blank into unknown
+shape_blank <- ufo8 %>%
+  filter(shape == "") %>%
+  mutate(shape = "unknown")
+
+shape_not_blank <- ufo8 %>%
+  filter(shape != "")
+
+ufo9 <- rbind(shape_blank, shape_not_blank) %>%
+  arrange(date_time)
+
+# NA into unknown
+shape_na <- ufo9 %>%
+  filter(is.na(shape)) %>%
+  mutate(shape = "unknown")
+
+shape_not_na <- ufo9 %>%
+  filter(!is.na(shape))
+
+ufo9 <- rbind(shape_na, shape_not_na) %>%
+  arrange(date_time)
+
+#check for 28 values instead of 31
+ufo9 %>%
+  select(shape) %>%
+  distinct()
+```
+
+Now that the data has been cleaned up a bit I will save it and attempt to get a lat and long for each location. The easiest way to do this will be to import the data into Tableau, let it assign coordinates, and then export that data. A geo locating API would do the same but take quite a while and most have rate limits which would complicate this process.
+
+```{r}
+
+ufo9 %>%
+  write.csv(file = "ufo_na.txt", row.names = F)
+
+```
+
+I'll skim the new lat long file to see how it turned out.
+
+```{r}
+
+lat_long <- read.csv("C:/Users/mdt20/Documents/R/intro_data_sci/ufo_proj/lat_long_ufo_tableau_generated.csv", sep = ",")
+lat_long
+```
+
+It worked. I have lat and long values for most of the data but still some NA values. I'll count them. 
+
+```{r}
+missing <- is.na(lat_long$Latitude..generated.)
+sum(missing)
+
+```
+
+Double check the different tibbles. 
+
+```{r}
+lat_long %>%
+  filter(is.na(Latitude..generated.))
+lat_long%>%
+    filter(!is.na(Latitude..generated.))
+```
+
+Just over 7k missing values. For the sake of time these will not be used for certain aspects of the project such as mapping, but will be used for other analysis.
+
+The results from Tableau will require matching to the remaining values. Drop rows with NA values in lat, long.
+
+```{r}
+lat_lng_clean <- lat_long %>%
+  drop_na(Latitude..generated.)
+
+```
+
+Change some column names to reduce chances of spelling errors for next steps.
+
+```{r}
+
+colnames(lat_lng_clean)[colnames(lat_lng_clean) == "ï..City"] <- "city"
+colnames(lat_lng_clean)[colnames(lat_lng_clean) == "Latitude..generated."] <- "lat"
+colnames(lat_lng_clean)[colnames(lat_lng_clean) == "Longitude..generated."] <- "lng"
+lat_lng_clean
+
+```
+
+Match locations with lat and long.
+
+```{r}
+#ufo9 <- read.csv(file = "ufo_na.txt")
+
+ufo9$lat <- NA
+ufo9$lng <- NA
+
+#check the columns are added
+head(ufo9)
+
+
+```
+
+First attempt at matching city and state in both files and appending lat and long to main file. This is a long process that never finished.
+
+```{r, include = F}
+
+#this takes a while to run
+# ufo6 <- ufo5
+# start <- Sys.time() #timing it just to see how long it actually takes
+# 
+# for(i in 1:nrow(ufo6)){
+#   for(j in 1:nrow(lat_lng_clean)){
+#     if(ufo6$state[i] == lat_lng_clean$State[j] & ufo6$city[i] == lat_lng_clean$city[j]){
+# #    j <- match(ufo7$city[i], lat_lng_clean$city)
+#       ufo6$lat[i] <- lat_lng_clean$lat[j]
+#       ufo6$lng[i] <- lat_lng_clean$lng[j]
+#   }}
+# }
+# 
+# end <- Sys.time()
+# time_to_run <- start-end
+# 
+# ufo6
+
+```
+
+Below I'm running code I found online for matching the values. My function never finished running even after an hour, but this works in seconds.
+
+```{r}
+ufo10 <- ufo9
+
+# found this code on stackoverflow
+# https://stackoverflow.com/questions/25539326/filling-in-columns-with-matching-ids-from-two-dataframes-in-r
+
+latlong <- c("lat", "lng")
+ufo10[latlong] <- lapply(latlong, function(x) lat_lng_clean[[x]][match(paste(ufo10$city, ufo10$state), paste(lat_lng_clean$city, lat_lng_clean$State))])
+
+#test to see if all values are updated
+ufo10 %>%
+  filter(city == "miami") %>%
+  select(lat, lng)
+
+```
+
+Appears to have worked. All Miami entries have the same lat long.
+
+Check how many columns there are before restructuring and saving.
+
+```{r}
+names(ufo10)
+
+```
+
+Restructure, removing unnecessary columns. 
+
+```{r}
+
+(ufo11 <- ufo10 %>%
+  select(year, month, day, hour, minute, country, state, city, shape, duration_s,
+         lat, lng))
+
+```
+
+Write this to a file to save progress.
+
+
+```{r}
+
+ufo11 %>%
+  write.csv(file = "ufo_na_app.txt", row.names = F)
+```
+
+Ready to test mapping with leaflet. Looking for values outside of FL which would indicate errors in lat long.
+
+
+```{r}
+to_map <- ufo11 %>%
+  filter(state == "FL", year == 2000)
+
+to_map
+```
+
+Try to display this data using leaflet. If it works I should have only values in the state of Florida.
+
+```{r}
+library(leaflet)
+to_map <- leaflet() %>%
+  addTiles() %>%
+  addMarkers(lat = to_map$lat, lng = to_map$lng)
+
+to_map
+
+```
+
+Looks good, data is ready for use in Shiny app.
+
+## Update
+
+There's an error with a certain city when running the app. I will rename the instances to the correct name.
+
+```{r}
+# problem city 'chã¢teauguay'
+
+err_city <- str_detect(ufo11$city, 'teauguay')
+which(err_city)
+
+```
+```{r}
+ufo11$city[52736]
+ufo11$city[71893]
+
+ufo11$city[52736] <- "chateauguay"
+ufo11$city[71893] <- "chateauguay"
+
+ufo11$city[52736]
+ufo11$city[71893]
+
+```
+```{r}
+# problem city 'ciel de st-rã©mi'
+
+err_city <- str_detect(ufo11$city, 'ciel de st-r')
+which(err_city)
+
+```
+```{r}
+ufo11 <- ufo11[-c(50352),]
+```
+
+```{r}
+#cyrus, wv us 52 north
+err_city <- str_detect(ufo11$city, 'cyrus, wv us 52 north')
+which(err_city)
+ufo11 <- ufo11[-c(90418),]
+
+```
+
+```{r}
+# lã©vis
+err_city <- str_detect(ufo11$city, 'lã©vis')
+which(err_city)
+ufo11 <- ufo11[-c(15238),]
+```
+
+```{r}
+# 'montrã©al
+err_city <- str_detect(ufo11$city, 'montrã©al')
+which(err_city)
+ufo11 <- ufo11[-c(8707,124896),]
+```
+
+```{r}
+#'los ãngeles'
+err_city <- str_detect(ufo11$city, 'los ãngeles')
+ufo11 <- ufo11[-c(which(err_city)),]
+```
+
+```{r}
+#'mã©xico'
+err_city <- str_detect(ufo11$city, 'mã©xico')
+ufo11 <- ufo11[-c(which(err_city)),]
+
+```
+
+Not sure why the encoding is messing up but it's becoming very tedious. I'm dropping all rows that have NA for lat and long to resolve this.
+
+```{r}
+
+ufo12 <- ufo11[!is.na(ufo11$lat),]
+
+head(ufo12)
+```
+
+Re save the csv.
+
+```{r}
+ufo12 %>% 
+  write.csv(file = "ufo_data_app.txt", row.names = F)
+```
