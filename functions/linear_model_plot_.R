@@ -8,7 +8,7 @@ linear_model_plot <- function(dat, s, t){
     theme_dark() +
     theme(plot.background = element_rect(fill = "#c1f9ea", 
                                          color = "#c1f9ea")) +
-    scale_x_continuous(breaks = seq(1, max(x), by = 2)) +
+    scale_x_continuous(breaks = seq(1, max(dat[[1]]), by = 2)) +
     labs(title = "Simple Linear Regression",
          subtitle = paste(toTitleCase(s), "~", t),
          x = toTitleCase(t),
