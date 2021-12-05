@@ -4,7 +4,8 @@
 plot_histogram <- function(dat, x_var, b, binw){
   
   h <- ggplot(dat, aes(x = unlist(dat[x_var]))) +
-    geom_histogram(bins = b, 
+    geom_histogram(stat = "count",
+                   bins = b, 
                    binwidth = binw, 
                    fill = "#1fde55", 
                    color = "#1fde2e", 
