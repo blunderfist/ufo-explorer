@@ -37,7 +37,7 @@ freq_model_plot <- function(dat, st1, st2, st3 = NULL, t){
     theme_dark() +
     theme(plot.background = element_rect(fill = "#c1f9ea", 
                                          color = "#c1f9ea")) +
-    scale_x_continuous(breaks = seq(1, max(x), by = 2)) +
+    scale_x_continuous(breaks = seq(1, max(st_1[[t]]), by = 2)) +
     labs(title = paste("Frequency of reports by", t),
          subtitle = paste(st1, "and", st2),
          x = toTitleCase(t),
