@@ -46,4 +46,3 @@ freq_model_plot <- function(dat, st1, st2, st3 = NULL, t){
   return(p)
 }
 
-freq_model_plot(data, "CA", "FL", NULL, "month")
