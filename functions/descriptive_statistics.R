@@ -11,7 +11,9 @@ show_desc <- function(dat, selected_var, single, geo_lev){
   time <- c("year", "month", "day", "hour", "minute", "duration_s")
   
   #total_data required for per_of_northam because filter operation was removing NA values and throwing off calculation
-  total_data <- data %>% filter(hour %in% min(hour,na.rm=T):max(hour, na.rm = T), minute %in% min(minute,na.rm=T):max(minute, na.rm=t), duration_s %in% min(duration_s,na.rm=T):max(duration_s,na.rm=T))
+  total_data <- data %>% filter(hour %in% min(hour,na.rm=T):max(hour, na.rm = T), 
+                                minute %in% min(minute,na.rm=T):max(minute, na.rm=T), 
+                                duration_s %in% min(duration_s,na.rm=T):max(duration_s,na.rm=T))
   
   num_reports <- nrow(dat) 
   per_of_northam <- round((num_reports / nrow(total_data)) * 100, digits = 3)
