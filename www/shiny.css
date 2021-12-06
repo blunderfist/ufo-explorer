@@ -1,15 +1,6 @@
 /*css for shiny*/
 
 @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
-/*
-@font-face {
-	font-family: "Oribtron",
-	src: url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
-}*/
-
-.test {
-	background-color: #000;
-}
 
 .custom_font{
 	font-family: 'Orbitron', sans-serif;
@@ -32,12 +23,5 @@
 	padding: 4em; /*space between chart and box blur*/
     background-color: #c1f9ea;
     box-shadow: inset 0 0 30px 30px #000;
-}
-
-.disk {
-	background-color: #fff;
-	width: 200px;
-	height: 100px;
-	border-radius: 100px/50px;
 }
 
