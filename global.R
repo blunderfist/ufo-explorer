@@ -1,6 +1,9 @@
 
 # checks and installs if missing
 if (!require('shiny')) install.packages("shiny")
+#if (!require('devtools')) install.packages("devtools")
+if (!require('feather')) install.packages("feather")
+
 if (!require('shinythemes')) install.packages("shinythemes")
 if (!require('tidyverse')) install.packages("tidyverse")
 if (!require('tools')) install.packages("tools")
@@ -9,6 +12,10 @@ if (!require('leaflet')) install.packages("leaflet")
 
 # data source
 data <- read_csv(file = "ufo_data_app.txt", col_types = cols(hour = "i", minute = "i"))
+
+#not using this at the moment, did not reduce memory consumption or speed up
+#write_feather(data, "data.feather")
+#data <- read_feather("data.feather")
 
 # function scripts
 source("functions/filter_data.R")
@@ -37,4 +44,5 @@ source("functions/linear_model_plot_.R")
 source("functions/linear_model_interpret.R")
 
 source("functions/if_blank_filt_freq.R")
+source("functions/filter_data_freq.R")
 source("functions/freq_model_plot.R")
