@@ -1,7 +1,7 @@
 # creates scatter plot based on user input from Shiny app
 # takes filtered data from filters function and scatter plot inputs
 
-plot_scatter <- function(filt_dat, x, y,jit=F, c = NULL, s = NULL){
+plot_scatter <- function(filt_dat, x, y, jit = F, c = NULL, s = NULL){
 
   sc_plot  <- ggplot(filt_dat, aes(x = unlist(filt_dat[x]), y = unlist(filt_dat[y]), color = c, size = s)) +
     geom_point() +
@@ -11,7 +11,8 @@ plot_scatter <- function(filt_dat, x, y,jit=F, c = NULL, s = NULL){
          color = c,
          size = s) +
     theme_dark() +
-    theme(plot.title = element_text(), axis.text.x = element_text(angle = 90))
+    theme(plot.title = element_text(hjust = 0.5), 
+          axis.text.x = element_text(angle = 90),)
   
   if(jit == F){
     return(sc_plot)
