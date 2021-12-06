@@ -2,9 +2,6 @@
 # Interactive Shiny App that allows users to explore UFO reports
 # 
 
-library(shiny)
-library(shinythemes)
-
 shinyUI(fluidPage(
   includeCSS("www/shiny.css"),
   theme = shinytheme("cyborg"),
@@ -477,8 +474,8 @@ shinyUI(fluidPage(
          checkboxInput("bp_view", "Show Box plot"),
 
          conditionalPanel(condition = "input.bp_view==1",
-
-            plotOutput("visualize_boxplot")#)
+                          fluidRow(class = "blur_b",
+            plotOutput("visualize_boxplot"))
          )  
             ) #mainpanel
             ) #sidebarlayout
