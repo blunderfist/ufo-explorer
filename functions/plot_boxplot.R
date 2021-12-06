@@ -11,7 +11,9 @@ bp <- ggplot(filt_dat, aes(x = loc, y = n)) +
        x = "Location",
        y = "Number of Reports") +
   theme_dark() +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.background = element_rect(fill = "#c1f9ea", 
+                                       color = "#c1f9ea"))
 
 return(bp)
 
