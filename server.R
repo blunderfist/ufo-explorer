@@ -301,7 +301,7 @@ shinyServer <- function(input, output, session) {
     output$visualize_boxplot <- renderPlot({
       input$update_wtest
       isolate(
-      if(input$yr_or_mo == "by_yr") y_o_m <- 1 else y <- 0)
+      if(input$yr_or_mo == "by_yr") y_o_m <- 1 else y_o_m <- 0)
       isolate(
       if(input$region == "by_country") geo_lev <- 1)
       isolate(
