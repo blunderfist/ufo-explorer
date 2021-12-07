@@ -2,8 +2,7 @@
 # checks and installs if missing
 if (!require('shiny')) install.packages("shiny")
 #if (!require('devtools')) install.packages("devtools")
-if (!require('feather')) install.packages("feather")
-
+#if (!require('feather')) install.packages("feather")
 if (!require('shinythemes')) install.packages("shinythemes")
 if (!require('tidyverse')) install.packages("tidyverse")
 if (!require('tools')) install.packages("tools")
@@ -27,6 +26,7 @@ source("functions/if_blank_filt_desc.R")
 source("functions/filter_data_desc.R")
 
 source("functions/visualize_histogram.R")
+source("functions/visualize_barchart.R")
 
 source("functions/if_blank_scat.R")
 source("functions/visualize_scatter_filters.R")

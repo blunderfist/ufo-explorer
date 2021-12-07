@@ -98,66 +98,106 @@ shinyServer <- function(input, output, session) {
     toTitleCase(input$choose_stat)
   })
   
-  ######## Histogram ########
-  
-  #updates histogram on clicking action button update_hist
-  update_histogram <- function(){
-    if(!input$update_hist){
-      return(isolate({output$visualize_histogram}))
-    }else{
-      return(output$visualize_histogram)
-    }
-  }
-  
   output$descriptive <- renderTable({
     descriptive_stat(data[input$choose_stat])
   })
-
-    output$visualize_histogram <- renderPlot({
-    input$update_hist
-    isolate(
-      #returns filtered data for histogram plot
-      hist_data <- if_blank_filt(input$h_yr,
-                                 input$h_mon,
-                                 input$h_day,
-                                 input$h_hr,
-                                 input$h_du,
-                                 input$h_co,
-                                 input$h_st,
-                                 input$h_sh))
-    isolate(
-      plot_histogram(
-        hist_data,
-        input$choose_hist,
-        input$hist_bins,
-        input$bin_w))
-  })
   
-    
-  data_hist <- eventReactive(input$clicks, {
+  
+  ######## Bar Chart / Histogram ########
+  
+  #updates chart on clicking action button update_chart
+  update_chart <- function(){
+    if(!input$update_chart){
+      return(isolate({output$visualize_chart}))
+    }else{
+      return(output$visualize_chart)
+    }
+  }
+
+  update_chart <- function(){
+    if(!input$update_chart){
+      return(isolate({output$chart_title}))
+    }else{
+      return(output$chart_title)
+    }
+  }
+  
+  data_chart <- eventReactive(input$clicks, {
+    input$chart_type
     input$choose_hist
     input$hist_bins
     input$bin_w
-    input$h_yr
-    input$h_mon
-    input$h_day
-    input$h_co
-    input$h_st
-    input$h_sh
-    input$h_hr
-    input$h_du
+    input$ch_yr
+    input$ch_mon
+    input$ch_day
+    input$ch_co
+    input$ch_st
+    input$ch_sh
+    input$ch_hr
+    input$ch_du
   })
   
+  
   observe({
-    hist_co <- input$h_co
-    if (is.null(hist_co))
-      hist_co <- character(0)
-    updateSelectInput(session, "h_st",
-                      label = "Filter by State",
-                      choices = c("All", levels(factor(data$state[data$country == input$h_co]))),
+    bar_co <- input$b_co
+    if (is.null(bar_co))
+      bar_co <- character(0)
+    updateSelectInput(session, "b_st",
+                      label = "State",
+                      choices = c("All", levels(factor(data$state[data$country == input$b_co]))),
                       selected = "All"
     )
   })
+  
+
+  output$visualize_chart <- renderPlot({
+    input$update_chart
+    isolate(
+      #returns filtered data for histogram plot
+      chart_data <- if_blank_filt(input$ch_yr,
+                                 input$ch_mon,
+                                 input$ch_day,
+                                 input$ch_hr,
+                                 input$ch_du,
+                                 input$ch_co,
+                                 input$ch_st,
+                                 input$ch_sh))
+    
+    isolate(
+    if(input$chart_type == "Bar Chart"){
+    isolate(
+      plot_barchart(
+        chart_data,
+        input$choose_barchart))
+    }else{
+    isolate(
+      plot_histogram(
+        chart_data,
+        input$choose_hist,
+        input$hist_bins,
+        input$bin_w))
+    })
+  })
+  
+
+  observe({
+    chart_co <- input$ch_co
+    if (is.null(chart_co))
+      chart_co <- character(0)
+    updateSelectInput(session, "ch_st",
+                      label = "State",
+                      choices = c("All", levels(factor(data$state[data$country == input$ch_co]))),
+                      selected = "All"
+    )
+  })
+  
+  # print selection on page
+  output$chart_title <- renderText({
+    input$update_chart
+    isolate(toTitleCase(input$chart_type))
+  })
+  
+
   
   ######## Scatter Plot ########
   
@@ -429,16 +469,16 @@ shinyServer <- function(input, output, session) {
     
     lin <- eventReactive(input$clicks, {
       input$lin_click
-      input$lin_co
-      input$lin_st
       input$lin_yr
       input$lin_mon
       input$lin_day
       input$lin_hr
       input$lin_du
-    })
+      input$lin_co
+      input$lin_st
+      })
     
-    #updates linear model on clicking action button lin_click
+    #updates linear reg table on clicking action button lin_click
     update_lin <- function(){
       if(!input$lin_click){
         return(isolate({output$linear_table}))
@@ -447,18 +487,18 @@ shinyServer <- function(input, output, session) {
       }
     }
     
-    
+    # buggy, causing filter function error, fix after final project
     # updates state selection linear model filter
-    observe({
-      l_co <- input$lin_st
-      if (is.null(l_co))
-        l_co <- character(0)
-      updateSelectInput(session, "lin_st",
-                        label = "State",
-                        choices = c("All", levels(factor(data$state[data$country == input$lin_co]))),
-                        selected = "All"
-      )
-    })
+    # observe({
+    #   l_st <- input$lin_co
+    #   if (is.null(l_st))
+    #     l_st <- character(0)
+    #   updateSelectInput(session, "lin_st",
+    #                     label = "State",
+    #                     choices = c("All", levels(factor(data$state[data$country == input$lin_co]))),
+    #                     selected = "All"
+    #                     )
+    # })
 
         
     #output for linear model table
@@ -478,6 +518,7 @@ shinyServer <- function(input, output, session) {
           linear_model(dat, input$lin_1, input$lin_2), #filtered data
           input$lin_1))#, input$lin_2))
     })
+    
     
     ######## Linear Regression Plot ########
     
@@ -505,8 +546,6 @@ shinyServer <- function(input, output, session) {
       isolate(
         linear_model_plot( 
           linear_model(dat, input$lin_1, input$lin_2), #filtered data
-          
-          #          dat, #filtered data
           input$lin_1,
           input$lin_2))
     })

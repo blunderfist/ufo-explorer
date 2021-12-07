@@ -114,89 +114,106 @@ shinyUI(fluidPage(
 
     # Second Tab: Visualizations
     navbarMenu("Visualization",
-      
-      # histogram page
-       tabPanel(title = "Histogram",
-          sidebarLayout(
-            sidebarPanel(
-              
-              selectInput(inputId = "choose_hist",
-                          label = "Choose a Variable",
-                          choices = c(names(data)),
-                          selected = "year"),
 
-              sliderInput("hist_bins",
-                          "Number of bins:",
-                          min = 1,
-                          max = 120,
-                          value = 120),
+               # bar chart / histogram page
+               tabPanel(title = "Chart",
+                        sidebarLayout(
+                          sidebarPanel(
+                            
 
-              sliderInput("bin_w",
-                          "Bin Width:",
-                          min = 1,
-                          max = 100,
-                          value = 1),
+                            radioButtons(inputId = "chart_type", 
+                                         label = "Chart Type", 
+                                         choices = c("Bar Chart", "Histogram")),
 
-              actionButton("update_hist",
-                           "Plot"),
+                            conditionalPanel(condition = "input.chart_type == 'Bar Chart'",
+                                             
+                                selectInput(inputId = "choose_barchart",
+                                            label = "Choose a Variable",
+                                            choices = c(names(data[-10])),
+                                            selected = "year"),
+                            ), # condition 1
 
-              
-              hr(),
-              h6("Filters"),
-              
-              selectInput(inputId = "h_co",
-                          label = "Country",
-                          choices = c("All", levels(factor(data$country)))),
-              
-              #updates on country filter selection
-              
-              selectInput(inputId = "h_st",
-                          label = "State",
-                          choices = c("All")),
-              
-              selectInput(inputId = "h_sh",
-                          label = "Shape",
-                          choices = c("All", levels(factor(data$shape)))),
-              
-              sliderInput("h_yr",
-                          label = "Years",
-                          min = min(data$year),
-                          max = max(data$year),
-                          value = c(min(data$year), max(data$year))),
-              
-              sliderInput("h_mon",
-                          label = "Months",
-                          min = min(data$month),
-                          max = max(data$month),
-                          value = c(min(data$month), max(data$month))),
-              
-              sliderInput("h_day",
-                          label = "Days",
-                          min = min(data$day),
-                          max = max(data$day),
-                          value = c(min(data$day), max(data$day))),
-
-              sliderInput("h_hr",
-                          label = "Hours",
-                          min = min(data$hour, na.rm = T),
-                          max = max(data$hour, na.rm = T),
-                          value = c(min(data$hour, na.rm = T), max(data$hour, na.rm = T))),
-
-              sliderInput("h_du",
-                          label = "Duration",
-                          min = min(data$duration_s, na.rm = T),
-                          max = max(data$duration_s, na.rm = T),
-                          value = c(min(data$duration_s, na.rm = T), max(data$duration_s, na.rm = T)))
-              
-            ), #sidebar panel
-
-            mainPanel(h4("Histogram"),
-                     fluidRow(class = "blur", 
-                plotOutput("visualize_histogram"))
-                      
-            ) #mainPanel
-          ) #sidebar layout
-                ), # end tab panel histogram
+                            conditionalPanel(condition = "input.chart_type == 'Histogram'",
+                                             
+                            selectInput(inputId = "choose_hist",
+                                        label = "Choose a Variable",
+                                        choices = c("year", "month", "day", "hour", "minute", "lat", "lng"),
+                                        selected = "year"),
+                            
+                            sliderInput("hist_bins",
+                                        "Number of bins:",
+                                        min = 1,
+                                        max = 120,
+                                        value = 120),
+                            
+                            sliderInput("bin_w",
+                                        "Bin Width:",
+                                        min = 1,
+                                        max = 60,
+                                        value = 1),
+                            ), # condition 2
+                            
+                            actionButton("update_chart",
+                                         "Plot"),
+                            
+                            
+                            hr(),
+                            h6("Filters"),
+                            
+                            selectInput(inputId = "ch_co",
+                                        label = "Country",
+                                        choices = c("All", levels(factor(data$country)))),
+                            
+                            #updates on country filter selection
+                            
+                            selectInput(inputId = "ch_st",
+                                        label = "State",
+                                        choices = c("All")),
+                            
+                            selectInput(inputId = "ch_sh",
+                                        label = "Shape",
+                                        choices = c("All", levels(factor(data$shape)))),
+                            
+                            sliderInput("ch_yr",
+                                        label = "Years",
+                                        min = min(data$year),
+                                        max = max(data$year),
+                                        value = c(min(data$year), max(data$year))),
+                            
+                            sliderInput("ch_mon",
+                                        label = "Months",
+                                        min = min(data$month),
+                                        max = max(data$month),
+                                        value = c(min(data$month), max(data$month))),
+                            
+                            sliderInput("ch_day",
+                                        label = "Days",
+                                        min = min(data$day),
+                                        max = max(data$day),
+                                        value = c(min(data$day), max(data$day))),
+                            
+                            sliderInput("ch_hr",
+                                        label = "Hours",
+                                        min = min(data$hour, na.rm = T),
+                                        max = max(data$hour, na.rm = T),
+                                        value = c(min(data$hour, na.rm = T), max(data$hour, na.rm = T))),
+                            
+                            sliderInput("ch_du",
+                                        label = "Duration",
+                                        min = min(data$duration_s, na.rm = T),
+                                        max = max(data$duration_s, na.rm = T),
+                                        value = c(min(data$duration_s, na.rm = T), max(data$duration_s, na.rm = T)))
+                            
+                          ), #sidebar panel
+                          
+                          mainPanel(h4(textOutput("chart_title")),
+                                    fluidRow(class = "blur",
+                                             plotOutput("visualize_chart"))
+                                    
+                          ) #mainPanel
+                        ) #sidebar layout
+               ), # end tab panel histogram
+               
 
        # Scatter plot tab
        tabPanel(title = "Scatter Plot",
@@ -500,20 +517,20 @@ shinyUI(fluidPage(
                  actionButton(inputId = "lin_click",
                               label = "Update"),
                  hr(),
-                 p("Choose a shape and a time to see the linear regression between the two variables."),
+                 p("Choose a shape and a time plot linear regression."),
                  hr(),
                  h6("Filters"),
 
                  selectInput(inputId = "lin_co",
                              label = "Country",
                              choices = c("All", levels(factor(data$country)))),
-
+                 
+                 # causing an error when selected, leave blank for final and fix later
                  #updates on country filter selection
-
                  selectInput(inputId = "lin_st",
                              label = "State",
                              choices = c("All")),
-
+             
                  sliderInput("lin_yr",
                              label = "Years",
                              min = min(data$year),
