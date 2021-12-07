@@ -32,7 +32,7 @@ Or visit <https://matt2021.shinyapps.io/UFO-Explorer/> to access the app via the
 
 ## Features
 
-The following explains the features found in the app and how they work. This only a brief description, for more detailed information please see the [tutorial](tutorial).
+The following explains the features found in the app and how they work. This only a brief description, for more detailed information please see the [tutorial](https://github.com/blunderfist/ufo-explorer/blob/main/UFO-Explorer%20Tutorial.pdf).
 
 ---
 
