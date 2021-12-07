@@ -4,8 +4,8 @@ plot_boxplot <- function(filt_dat){
   
 bp <- ggplot(filt_dat, aes(x = loc, y = n)) +
   stat_boxplot(geom = "errorbar") +
-  geom_boxplot(color = "#1637fa",
-               fill = "#9bf6ea",
+  geom_boxplot(color = "#9b068b",
+               fill = "#ed94ec",
                alpha = 0.5) +
   labs(title = "Distributions for selected locations",
        x = "Location",
