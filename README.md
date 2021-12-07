@@ -5,7 +5,7 @@
 ## Abstract
 
 
-UFO Explorer is an interactive web based app that allows users to browse data from reported UFO sightings in North America. The data used for this project is a subset of the original data source, available at [my Kaggle page](https://www.kaggle.com/blunderfist/ufo-sightings). It was scraped from the [National UFO Reporting Center website](http://www.nuforc.org) using [this code](https://github.com/blunderfist/py-ufo-scrape). The UFO.Rmd file shows the steps taken to obtain the final version of the data file.
+UFO Explorer is an interactive web based app that allows users to browse data from reported UFO sightings in North America. The data used for this project is a subset of the original data source, available at [my Kaggle page](https://www.kaggle.com/blunderfist/ufo-sightings). It was scraped from the [National UFO Reporting Center website](http://www.nuforc.org) using [this code](https://github.com/blunderfist/py-ufo-scrape). The [UFO.Rmd](https://github.com/blunderfist/ufo-explorer/blob/main/ufo.rmd) file shows the steps taken to obtain the final version of the data file.
 
 ---
 
@@ -32,7 +32,7 @@ Or visit <https://matt2021.shinyapps.io/UFO-Explorer/> to access the app via the
 
 ## Features
 
-The following explains the features found in the app and how they work. This only a brief description, for more detailed information please see the <tutorial>.
+The following explains the features found in the app and how they work. This only a brief description, for more detailed information please see the [tutorial](tutorial).
 
 ---
 
