@@ -1,4 +1,3 @@
-# ufo-explorer
 # UFO Explorer
 
 ---
@@ -33,7 +32,7 @@ Or visit <https://matt2021.shinyapps.io/UFO-Explorer/> to access the app via the
 
 ## Features
 
-The following explains the features found in the app and how they work. This only a brief description, for more detailed information please see the [tutorial](https://github.com/blunderfist/ufo-explorer/blob/main/UFO-Explorer%20Tutorial.pdf).
+The following explains the features found in the app and how they work. This only a brief description, for more detailed information please see the <tutorial>.
 
 ---
 
@@ -53,9 +52,19 @@ Simple summary statistics for each variable in the data set.
 
 ## Tab 2: Visualization
 
+
+### Chart
+
+---
+
+### Bar Chart
+
+Displays a bar char showing selected variable. Filters can be applied.
+
+
 ### Histogram
 
-Displays a histogram showing selected variables. Filters can be applied.
+Displays a histogram showing selected variable. Can only select continuous variables. Filters can be applied.
 
 
 ### Scatter Plot
@@ -94,4 +103,6 @@ Shows the frequency of reports between either two or three states over a given t
 ---
 
 
-For more in depth usage information the tutorial for UFO Explorer can be downloaded at <https://github.com/blunderfist/ufo-explorer/blob/main/UFO-Explorer%20Tutorial.pdf>.
+For more in depth usage information the tutorial for UFO Explorer can be downloaded at <https://github.com/blunderfist/ufo-explorer/blob/main/UFO-Explorer%20Tutorial.pdf>
+
+
