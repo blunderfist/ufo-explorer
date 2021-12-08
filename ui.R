@@ -525,10 +525,10 @@ shinyUI(fluidPage(
                              label = "Country",
                              choices = c("All", levels(factor(data$country)))),
                  
-                 # causing an error when selected, leave blank for final and fix later
+                 # causing an error when selected, removing causes bug in country filter, leave blank for final and fix later
                  #updates on country filter selection
                  selectInput(inputId = "lin_st",
-                             label = "State",
+                             label = "State (not selectable)",
                              choices = c("All")),
              
                  sliderInput("lin_yr",
