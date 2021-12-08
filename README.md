@@ -2,6 +2,19 @@
 
 ---
 
+## Table of Contents
+
+[Abstract](https://github.com/blunderfist/ufo-explorer/blob/main/README.md#abstract)
+[How to get started](https://github.com/blunderfist/ufo-explorer/blob/main/README.md#how-to-start-the-software)
+[Requirements](https://github.com/blunderfist/ufo-explorer/blob/main/README.md#requirements)
+[Features](https://github.com/blunderfist/ufo-explorer/blob/main/README.md#features)
+[Descriptive Statistics](https://github.com/blunderfist/ufo-explorer/blob/main/README.md#tab-1-descriptive-statistics)
+[Visualization](https://github.com/blunderfist/ufo-explorer/blob/main/README.md#tab-2-visualization)
+[Statistical Analysis](https://github.com/blunderfist/ufo-explorer/blob/main/README.md#tab-3-statistical-analysis)
+[Tutorial](https://github.com/blunderfist/ufo-explorer/blob/main/README.md#tutorial)
+
+---
+
 ## Abstract
 
 
