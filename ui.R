@@ -369,7 +369,7 @@ shinyUI(fluidPage(
     # Third Tab: Statistical Analysis
     navbarMenu("Statistical Analysis",
                
-    tabPanel(title = "Wilcoxon Test",
+    tabPanel(title = "Compare the mean number of reports between two locations",
 
        sidebarLayout(
 
@@ -517,7 +517,7 @@ shinyUI(fluidPage(
                  actionButton(inputId = "lin_click",
                               label = "Update"),
                  hr(),
-                 p("Choose a shape and a time plot linear regression."),
+                 p("Choose a shape and a time to plot linear regression."),
                  hr(),
                  h6("Filters"),
 
