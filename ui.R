@@ -484,7 +484,8 @@ shinyUI(fluidPage(
         # main panel
         mainPanel(h4("Wilcoxon rank sum test"),
                   h6("Compare the mean number of reports between two locations so see if they are statistically similar"),
-            
+                  hr(),
+                  
             tableOutput("wtest_results"),
             hr(),
             textOutput("wt_conc"),
