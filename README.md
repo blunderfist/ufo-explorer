@@ -35,13 +35,15 @@ UFO Explorer is an interactive web based app that allows users to browse data fr
 
 If R is installed and you wish to run on your computer, copy the code chunk below and paste into R terminal.
 
+Note: Some users have reported receiving an error the first time they run this code chunk, but have had success by simply running it again. If you get an error please just rerun the code.
+
 ```{r}
 #install.packages("shiny")
 library(shiny)
 shiny::runGitHub("ufo-explorer", "blunderfist", ref = "main")
 ```
 
-Or visit <https://matt2021.shinyapps.io/UFO-Explorer/> to access the app via the web.
+Or visit <https://matt2021.shinyapps.io/UFO-Explorer/> to access the app via the web. (This option is currently not working due to the memory limitations of the free service plan.)
 
 ## Features
 
