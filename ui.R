@@ -369,7 +369,7 @@ shinyUI(fluidPage(
     # Third Tab: Statistical Analysis
     navbarMenu("Statistical Analysis",
                
-    tabPanel(title = "Compare the mean number of reports between two locations",
+    tabPanel(title = "Wilcoxon Test",
 
        sidebarLayout(
 
@@ -483,6 +483,7 @@ shinyUI(fluidPage(
                 
         # main panel
         mainPanel(h4("Wilcoxon rank sum test"),
+                  h6("Compare the mean number of reports between two locations so see if they are statistically similar"),
             
             tableOutput("wtest_results"),
             hr(),
@@ -525,10 +526,10 @@ shinyUI(fluidPage(
                              label = "Country",
                              choices = c("All", levels(factor(data$country)))),
                  
-                 # causing an error when selected, removing causes bug in country filter, leave blank for final and fix later
+                 # causing an error when selected, leave blank for final and fix later
                  #updates on country filter selection
                  selectInput(inputId = "lin_st",
-                             label = "State (not selectable)",
+                             label = "State (currently unselectable)",
                              choices = c("All")),
              
                  sliderInput("lin_yr",
