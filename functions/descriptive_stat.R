@@ -4,7 +4,7 @@
 
 descriptive_stat <- function(choose_stats){
 
-  data <- read_csv(file = "ufo_data_app.txt")
+  #data <- read_csv(file = "ufo_data_app.txt")
   
   skimmed <- skim(choose_stats)
   skim_results <- data.frame(skimmed)
