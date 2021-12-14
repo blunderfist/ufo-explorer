@@ -43,7 +43,7 @@ library(shiny)
 shiny::runGitHub("ufo-explorer", "blunderfist", ref = "main")
 ```
 
-Or visit <https://matt2021.shinyapps.io/UFO-Explorer/> to access the app via the web. (This option is currently not working due to the memory limitations of the free service plan.)
+Or visit <https://matt2021.shinyapps.io/UFO-Explorer/> to access the app via the web. (This option is currently only using data from 2011 to 2021 due to the memory limitations of the free service plan.)
 
 ## Features
 
